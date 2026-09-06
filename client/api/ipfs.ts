@@ -1,4 +1,12 @@
-const MAX_FILE_SIZE = 100 * 1024; // 100 KB
+const MAX_METADATA_SIZE = 100 * 1024; // 100 KB
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5 MB
+
+const ALLOWED_IMAGE_TYPES = new Set([
+    'image/png',
+    'image/jpeg',
+    'image/webp',
+    'image/gif',
+]);
 
 export default {
     async fetch(request: Request) {
@@ -38,68 +46,85 @@ export default {
                 );
             }
 
-            if (file.size > MAX_FILE_SIZE) {
-                return Response.json(
-                    { error: 'File is too large' },
-                    { status: 413 },
-                );
-            }
-
             const contentType = file.type.toLowerCase();
 
-            if (
-                contentType !== 'application/json' &&
-                contentType !== 'text/json'
-            ) {
+            const isJson =
+                contentType === 'application/json' ||
+                contentType === 'text/json';
+
+            const isImage = ALLOWED_IMAGE_TYPES.has(contentType);
+
+            if (!isJson && !isImage) {
                 return Response.json(
-                    { error: 'Only JSON metadata files are allowed' },
+                    { error: 'Unsupported file type' },
                     { status: 415 },
                 );
             }
 
-            const fileText = await file.text();
+            let safeFile: File;
 
-            let metadata: unknown;
+            if (isJson) {
+                if (file.size > MAX_METADATA_SIZE) {
+                    return Response.json(
+                        { error: 'Metadata file is too large' },
+                        { status: 413 },
+                    );
+                }
 
-            try {
-                metadata = JSON.parse(fileText);
-            } catch {
-                return Response.json(
-                    { error: 'Invalid JSON metadata' },
-                    { status: 400 },
+                const fileText = await file.text();
+
+                let metadata: unknown;
+
+                try {
+                    metadata = JSON.parse(fileText);
+                } catch {
+                    return Response.json(
+                        { error: 'Invalid JSON metadata' },
+                        { status: 400 },
+                    );
+                }
+
+                if (
+                    typeof metadata !== 'object' ||
+                    metadata === null ||
+                    Array.isArray(metadata)
+                ) {
+                    return Response.json(
+                        { error: 'Metadata must be a JSON object' },
+                        { status: 400 },
+                    );
+                }
+
+                const metadataObject =
+                    metadata as Record<string, unknown>;
+
+                if (
+                    typeof metadataObject.name !== 'string' ||
+                    metadataObject.name.trim().length === 0
+                ) {
+                    return Response.json(
+                        { error: 'Metadata must contain a valid name' },
+                        { status: 400 },
+                    );
+                }
+
+                safeFile = new File(
+                    [JSON.stringify(metadataObject)],
+                    'metadata.json',
+                    {
+                        type: 'application/json',
+                    },
                 );
+            } else {
+                if (file.size > MAX_IMAGE_SIZE) {
+                    return Response.json(
+                        { error: 'Image file is too large' },
+                        { status: 413 },
+                    );
+                }
+
+                safeFile = file;
             }
-
-            if (
-                typeof metadata !== 'object' ||
-                metadata === null ||
-                Array.isArray(metadata)
-            ) {
-                return Response.json(
-                    { error: 'Metadata must be a JSON object' },
-                    { status: 400 },
-                );
-            }
-
-            const metadataObject = metadata as Record<string, unknown>;
-
-            if (
-                typeof metadataObject.name !== 'string' ||
-                metadataObject.name.trim().length === 0
-            ) {
-                return Response.json(
-                    { error: 'Metadata must contain a valid name' },
-                    { status: 400 },
-                );
-            }
-
-            const safeFile = new File(
-                [JSON.stringify(metadataObject)],
-                'metadata.json',
-                {
-                    type: 'application/json',
-                },
-            );
 
             const pinataFormData = new FormData();
             pinataFormData.append('file', safeFile);
