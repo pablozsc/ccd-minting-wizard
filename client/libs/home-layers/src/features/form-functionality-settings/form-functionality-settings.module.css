@@ -1,0 +1,6 @@
+.formFunctionalitySettings {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+}

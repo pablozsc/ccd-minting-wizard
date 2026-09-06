@@ -1,0 +1,11 @@
+.resultContent {
+}
+
+.link {
+    text-decoration: underline;
+    color: theme('colors.blue.500');
+
+    &:hover {
+        color: theme('colors.blue.600');
+    }
+}

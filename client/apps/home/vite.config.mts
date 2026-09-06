@@ -1,0 +1,54 @@
+import * as process from 'process';
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import { nxViteTsPaths } from '@nx/vite/plugins/nx-tsconfig-paths.plugin';
+import svgr from 'vite-plugin-svgr';
+import plainText from 'vite-plugin-plain-text';
+import dynamicImport from 'vite-plugin-dynamic-import';
+
+const props = {
+    isDev: process.env.IS_DEV || true,
+    basePath: process.env.BASE_PATH || '/',
+    featureFlagAuth: process.env.FEATURE_FLAG_AUTH || false,
+};
+
+// eslint-disable-next-line import/no-default-export
+export default defineConfig({
+    base: props.basePath,
+    root: __dirname,
+    cacheDir: '../../node_modules/.vite/apps/home',
+    plugins: [
+        react(),
+        nxViteTsPaths(),
+        svgr({
+            svgrOptions: {},
+        }),
+        plainText(['**/*.schema', '**/*.module', '**/*.rs']),
+        dynamicImport(),
+    ],
+    define: {
+        __IS_DEV__: JSON.stringify(props.isDev),
+        __BASE_PATH__: JSON.stringify(props.basePath),
+        __API__: JSON.stringify('http://localhost:8000'),
+    },
+
+    server: {
+        port: 4200,
+        host: 'localhost',
+        fs: {
+            allow: [
+                '../../libs/shared/assets',
+                '../../libs/shared/hooks',
+            ],
+        },
+    },
+
+    preview: { port: 4300, host: 'localhost' },
+
+    build: {
+        outDir: '../../dist/apps/home',
+        emptyOutDir: true,
+        reportCompressedSize: true,
+        commonjsOptions: { transformMixedEsModules: true },
+    },
+});
