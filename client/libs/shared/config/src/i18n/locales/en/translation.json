@@ -12,6 +12,8 @@
         "pausable": "Enables Pausable feature that allows pausing the token state.",
         "roles": "Enables Roles feature that allows granting or revoking roles for some actions on the smart contract.",
         "upgradable": "Enables Upgradable feature that allows upgrading smart contract if its needed.",
-        "sponsored": "Enables Sponsored feature that allows to support sponsored transactions for the tokens created on this smart contract."
+        "sponsored": "Enables Sponsored feature that allows to support sponsored transactions for the tokens created on this smart contract.",
+        "displayImage": "Supported formats: PNG, JPEG, WebP, GIF. Maximum file size: 5 MB.",
+        "thumbnailImage": "Supported formats: PNG, JPEG, WebP, GIF. Maximum file size: 5 MB."
     }
 }

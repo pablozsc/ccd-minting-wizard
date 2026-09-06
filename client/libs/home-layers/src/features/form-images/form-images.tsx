@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar';
 import { Switch } from '@/shared/ui/switch';
 import { Label } from '@/shared/ui/label';
 import { useMintStore } from '@/shared/store/mint-store';
+import { Hint } from '@/shared/ui/hint';
 
 interface FormImagesProps {
     className?: string;
@@ -114,172 +115,189 @@ export function FormImages(props: FormImagesProps) {
             className={cn(className, cls.formImages, 'flex gap-4')}
             onChange={handleSubmit(onAction)}
         >
-            <Dialog>
-                <DialogTrigger
-                    asChild
-                    type='button'
-                >
-                    <Button
-                        className={'flex gap-2'}
-                        variant={'outline'}
-                        disabled={isDisplayLoading || isFileLoaded}
+            <div className='flex items-center gap-2'>
+                <Dialog>
+                    <DialogTrigger
+                        asChild
+                        type='button'
                     >
-                        Add Display{' '}
-                        {isDisplayLoading ? (
-                            <LoaderCircle {...spinnerProps} />
-                        ) : savedDisplay ? (
-                            <Check size={16} />
-                        ) : (
-                            <Upload size={16} />
-                        )}
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Display</DialogTitle>
-                        <DialogDescription>
-                            Make changes to your display. Click save when you're
-                            done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className='flex items-start justify-between gap-4'>
-                        <div className='flex flex-col gap-4'>
-                            <Controller
-                                control={control}
-                                name={'url usage display'}
-                                render={({
-                                    field: { onChange, value, name, ref },
-                                }) => (
-                                    <div className='flex items-center gap-4'>
-                                        <Label
-                                            className='cursor-pointer text-sm capitalize'
-                                            htmlFor={`switch-${name}`}
-                                        >
-                                            {name}
-                                        </Label>
-                                        <Switch
-                                            ref={ref}
-                                            id={`switch-${name}`}
-                                            checked={value}
-                                            onCheckedChange={(event) => {
-                                                onChange(event);
-                                                handleSubmit(onAction)();
-                                            }}
-                                        />
-                                    </div>
-                                )}
-                            />
-                            {isUrlDisplay ? (
-                                <InputControlled
-                                    control={control}
-                                    name={'url display'}
-                                />
+                        <Button
+                            className={'flex gap-2'}
+                            variant={'outline'}
+                            disabled={isDisplayLoading || isFileLoaded}
+                        >
+                            Add Display{' '}
+                            {isDisplayLoading ? (
+                                <LoaderCircle {...spinnerProps} />
+                            ) : savedDisplay ? (
+                                <Check size={16} />
                             ) : (
-                                <InputFile
-                                    className={'max-w-[180px]'}
-                                    accept='.png,.jpg,.jpeg,.ico'
-                                    formReg={register('file display')}
-                                />
+                                <Upload size={16} />
                             )}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Display</DialogTitle>
+                            <DialogDescription>
+                                Make changes to your display. Click save when
+                                you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className='flex items-start justify-between gap-4'>
+                            <div className='flex flex-col gap-4'>
+                                <Controller
+                                    control={control}
+                                    name={'url usage display'}
+                                    render={({
+                                        field: { onChange, value, name, ref },
+                                    }) => (
+                                        <div className='flex items-center gap-4'>
+                                            <Label
+                                                className='cursor-pointer text-sm capitalize'
+                                                htmlFor={`switch-${name}`}
+                                            >
+                                                {name}
+                                            </Label>
+                                            <Switch
+                                                ref={ref}
+                                                id={`switch-${name}`}
+                                                checked={value}
+                                                onCheckedChange={(event) => {
+                                                    onChange(event);
+                                                    handleSubmit(onAction)();
+                                                }}
+                                            />
+                                        </div>
+                                    )}
+                                />
+                                {isUrlDisplay ? (
+                                    <InputControlled
+                                        control={control}
+                                        name={'url display'}
+                                    />
+                                ) : (
+                                    <InputFile
+                                        className={'max-w-[180px]'}
+                                        accept='.png,.jpg,.jpeg,.webp,.gif'
+                                        formReg={register('file display')}
+                                    />
+                                )}
+                            </div>
+                            <Avatar
+                                className={cn(cls.tokenAvatar, 'h-64 w-64')}
+                            >
+                                <AvatarImage
+                                    src={displayImage}
+                                    alt={'image'}
+                                />
+                                <AvatarFallback>
+                                    no display chosen
+                                </AvatarFallback>
+                            </Avatar>
                         </div>
-                        <Avatar className={cn(cls.tokenAvatar, 'h-64 w-64')}>
-                            <AvatarImage
-                                src={displayImage}
-                                alt={'image'}
-                            />
-                            <AvatarFallback>no display chosen</AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type='button'>Save</Button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-            <Dialog>
-                <DialogTrigger
-                    asChild
-                    type='button'
-                >
-                    <Button
-                        className='flex gap-2'
-                        variant={'outline'}
-                        disabled={isThumbnailLoading || isFileLoaded}
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type='button'>Save</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Hint name='displayImage' />
+            </div>
+
+            <div className='flex items-center gap-2'>
+                <Dialog>
+                    <DialogTrigger
+                        asChild
+                        type='button'
                     >
-                        Add Thumbnail{' '}
-                        {isThumbnailLoading ? (
-                            <LoaderCircle {...spinnerProps} />
-                        ) : savedThumbnail ? (
-                            <Check size={16} />
-                        ) : (
-                            <Upload size={16} />
-                        )}
-                    </Button>
-                </DialogTrigger>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>Thumbnail</DialogTitle>
-                        <DialogDescription>
-                            Make changes to your thumbnail. Click save when
-                            you're done.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className='flex flex-col'>
-                        <div className='flex flex-col gap-4'>
-                            <Controller
-                                control={control}
-                                name={'url usage thumbnail'}
-                                render={({
-                                    field: { onChange, value, name, ref },
-                                }) => (
-                                    <div className='flex items-center gap-4'>
-                                        <Switch
-                                            ref={ref}
-                                            id={`switch-${name}`}
-                                            checked={value}
-                                            onCheckedChange={(event) => {
-                                                onChange(event);
-                                                handleSubmit(onAction)();
-                                            }}
-                                        />
-                                        <Label
-                                            className='cursor-pointer text-sm capitalize'
-                                            htmlFor={`switch-${name}`}
-                                        >
-                                            {name}
-                                        </Label>
-                                    </div>
-                                )}
-                            />
-                            {isUrlThumbnail ? (
-                                <InputControlled
-                                    control={control}
-                                    name={'url thumbnail'}
-                                />
+                        <Button
+                            className='flex gap-2'
+                            variant={'outline'}
+                            disabled={isThumbnailLoading || isFileLoaded}
+                        >
+                            Add Thumbnail{' '}
+                            {isThumbnailLoading ? (
+                                <LoaderCircle {...spinnerProps} />
+                            ) : savedThumbnail ? (
+                                <Check size={16} />
                             ) : (
-                                <InputFile
-                                    accept='.png,.jpg,.jpeg,.ico'
-                                    formReg={register('file thumbnail')}
-                                    className={'max-w-[180px]'}
-                                />
+                                <Upload size={16} />
                             )}
+                        </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Thumbnail</DialogTitle>
+                            <DialogDescription>
+                                Make changes to your thumbnail. Click save when
+                                you're done.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <div className='flex flex-col'>
+                            <div className='flex flex-col gap-4'>
+                                <Controller
+                                    control={control}
+                                    name={'url usage thumbnail'}
+                                    render={({
+                                        field: { onChange, value, name, ref },
+                                    }) => (
+                                        <div className='flex items-center gap-4'>
+                                            <Switch
+                                                ref={ref}
+                                                id={`switch-${name}`}
+                                                checked={value}
+                                                onCheckedChange={(event) => {
+                                                    onChange(event);
+                                                    handleSubmit(onAction)();
+                                                }}
+                                            />
+                                            <Label
+                                                className='cursor-pointer text-sm capitalize'
+                                                htmlFor={`switch-${name}`}
+                                            >
+                                                {name}
+                                            </Label>
+                                        </div>
+                                    )}
+                                />
+                                {isUrlThumbnail ? (
+                                    <InputControlled
+                                        control={control}
+                                        name={'url thumbnail'}
+                                    />
+                                ) : (
+                                    <InputFile
+                                        accept='.png,.jpg,.jpeg,.webp,.gif'
+                                        formReg={register('file thumbnail')}
+                                        className={'max-w-[180px]'}
+                                    />
+                                )}
+                            </div>
+                            <Avatar
+                                className={cn(cls.tokenAvatar, 'h-8 w-8')}
+                            >
+                                <AvatarImage
+                                    src={thumbnailImage}
+                                    alt={'image'}
+                                />
+                                <AvatarFallback>
+                                    no thumbnail chosen
+                                </AvatarFallback>
+                            </Avatar>
                         </div>
-                        <Avatar className={cn(cls.tokenAvatar, 'h-8 w-8')}>
-                            <AvatarImage
-                                src={thumbnailImage}
-                                alt={'image'}
-                            />
-                            <AvatarFallback>no thumbnail chosen</AvatarFallback>
-                        </Avatar>
-                    </div>
-                    <DialogFooter>
-                        <DialogClose asChild>
-                            <Button type='button'>Save</Button>
-                        </DialogClose>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
+                        <DialogFooter>
+                            <DialogClose asChild>
+                                <Button type='button'>Save</Button>
+                            </DialogClose>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                <Hint name='thumbnailImage' />
+            </div>
         </form>
     );
 }
