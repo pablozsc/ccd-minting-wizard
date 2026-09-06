@@ -55,16 +55,16 @@ export function WizardPage(props: WizardPageProps) {
             </div>
 
             <p className={cn('mt-4 text-xs')}>
-                This tool is fully open sourced and community driven, source
-                code can be found in{' '}
+                This tool is fully open source and community-driven. Source code is
+                available on{' '}
                 <a
                     className='link'
                     target={'_blank'}
-                    href={'https://github.com/KatasonovYP/ccd-minting-wizard'}
+                    href={'https://github.com/pablozsc/ccd-minting-wizard'}
                 >
-                    here
-                </a>{' '}
-                to contribution.
+                    GitHub
+                </a>
+                . Contributions are welcome.
             </p>
         </div>
     );
