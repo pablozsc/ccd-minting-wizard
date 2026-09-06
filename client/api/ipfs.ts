@@ -1,3 +1,5 @@
+const MAX_FILE_SIZE = 100 * 1024; // 100 KB
+
 export default {
     async fetch(request: Request) {
         if (request.method !== 'POST') {
@@ -29,8 +31,78 @@ export default {
                 );
             }
 
+            if (file.size === 0) {
+                return Response.json(
+                    { error: 'File is empty' },
+                    { status: 400 },
+                );
+            }
+
+            if (file.size > MAX_FILE_SIZE) {
+                return Response.json(
+                    { error: 'File is too large' },
+                    { status: 413 },
+                );
+            }
+
+            const contentType = file.type.toLowerCase();
+
+            if (
+                contentType !== 'application/json' &&
+                contentType !== 'text/json'
+            ) {
+                return Response.json(
+                    { error: 'Only JSON metadata files are allowed' },
+                    { status: 415 },
+                );
+            }
+
+            const fileText = await file.text();
+
+            let metadata: unknown;
+
+            try {
+                metadata = JSON.parse(fileText);
+            } catch {
+                return Response.json(
+                    { error: 'Invalid JSON metadata' },
+                    { status: 400 },
+                );
+            }
+
+            if (
+                typeof metadata !== 'object' ||
+                metadata === null ||
+                Array.isArray(metadata)
+            ) {
+                return Response.json(
+                    { error: 'Metadata must be a JSON object' },
+                    { status: 400 },
+                );
+            }
+
+            const metadataObject = metadata as Record<string, unknown>;
+
+            if (
+                typeof metadataObject.name !== 'string' ||
+                metadataObject.name.trim().length === 0
+            ) {
+                return Response.json(
+                    { error: 'Metadata must contain a valid name' },
+                    { status: 400 },
+                );
+            }
+
+            const safeFile = new File(
+                [JSON.stringify(metadataObject)],
+                'metadata.json',
+                {
+                    type: 'application/json',
+                },
+            );
+
             const pinataFormData = new FormData();
-            pinataFormData.append('file', file);
+            pinataFormData.append('file', safeFile);
 
             const pinataResponse = await fetch(
                 'https://api.pinata.cloud/pinning/pinFileToIPFS',
