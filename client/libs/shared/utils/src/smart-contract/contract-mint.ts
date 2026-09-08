@@ -6,12 +6,15 @@ import {
     ModuleReference,
     SchemaVersion,
 } from '@concordium/web-sdk';
+import type { WalletConnection } from '@concordium/react-components';
+import { moduleSchemaFromBase64 } from '@concordium/wallet-connectors';
 import {
     MAX_CONTRACT_EXECUTION_ENERGY,
 } from '@/shared/config/concordium';
-import { detectConcordiumProvider } from '@concordium/browser-wallet-api-helpers';
 
 export async function contractMint(
+    connection: WalletConnection,
+    account: string,
     schema: string,
     reference: string,
     contractName: string,
@@ -19,10 +22,8 @@ export async function contractMint(
     amount: number,
     maxSupply: number,
 ): Promise<string> {
-    const provider = await detectConcordiumProvider();
-    const accountAddress = await provider.requestAccounts();
-    return await provider.sendTransaction(
-        accountAddress[0],
+    return connection.signAndSendTransaction(
+        account,
         AccountTransactionType.InitContract,
         {
             initName: ContractName.fromString(contractName),
@@ -33,28 +34,29 @@ export async function contractMint(
             moduleRef: ModuleReference.fromHexString(reference),
         },
         {
-            premint_tokens: [
-                [
-                    '01',
+            parameters: {
+                premint_tokens: [
                     [
-                        {
-                            url: metadataUrl,
-                            hash: {
-                                None: [],
+                        '01',
+                        [
+                            {
+                                url: metadataUrl,
+                                hash: {
+                                    None: [],
+                                },
                             },
-                        },
-                        {
-                            amount: `${amount}`,
-                            max_supply: `${maxSupply}`,
-                        },
+                            {
+                                amount: `${amount}`,
+                                max_supply: `${maxSupply}`,
+                            },
+                        ],
                     ],
                 ],
-            ],
+            },
+            schema: moduleSchemaFromBase64(
+                schema,
+                SchemaVersion.V1,
+            ),
         },
-        {
-            type: 'module',
-            value: schema,
-        },
-        SchemaVersion.V1,
     );
 }

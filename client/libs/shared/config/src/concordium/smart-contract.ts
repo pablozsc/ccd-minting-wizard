@@ -1,7 +1,9 @@
 import {
     BrowserWalletConnector,
+    WalletConnectConnector,
     ephemeralConnectorType,
 } from '@concordium/react-components';
+
 import { LOCAL_STORAGE_KEY } from '../const';
 
 export const MAX_CONTRACT_EXECUTION_ENERGY = BigInt(6_000);
@@ -29,4 +31,24 @@ export const RAW_SCHEMA = storedRawSchema ?? DEFAULT_RAW_SCHEMA;
 
 export const BROWSER_WALLET = ephemeralConnectorType(
     BrowserWalletConnector.create,
+);
+
+const walletConnectProjectId =
+    import.meta.env.VITE_WALLET_CONNECT_PROJECT_ID;
+
+const WALLET_CONNECT_OPTS = {
+    projectId: walletConnectProjectId,
+    metadata: {
+        name: 'CCD Minting Wizard',
+        description: 'Mint CIS-2 tokens on Concordium',
+        url: 'https://ccdtoken.xyz',
+        icons: [],
+    },
+};
+
+export const WALLET_CONNECT = ephemeralConnectorType(
+    WalletConnectConnector.create.bind(
+        undefined,
+        WALLET_CONNECT_OPTS,
+    ),
 );
